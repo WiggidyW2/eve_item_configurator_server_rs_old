@@ -1,5 +1,5 @@
 [package]
-name = "item_configurator"
+name = "item_configurator_server"
 version = "0.1.0"
 edition = "2021"
 
