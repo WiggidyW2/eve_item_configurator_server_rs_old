@@ -2,9 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     typedef::TypeId,
-    data::{
-        stable::DivisionNames,
-    },
+    data::DivisionNames,
 };
 
 use tonic::async_trait;

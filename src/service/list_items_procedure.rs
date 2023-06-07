@@ -1,8 +1,8 @@
-use crate::{
-    item_configurator_proto as pb,
-};
+use crate::pb;
 
-use super::error::{Error, ProtoFieldError};
+use super::error::ProtoFieldError;
+
+use crate::error::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Iterate {
@@ -44,13 +44,20 @@ impl Procedure {
     }
 }
 
+// This implementation was computed by drawing a truth table and trying to
+// minimize the number of match arms. It has been formatted for readability.
 impl TryFrom<&pb::ListReq> for Procedure {
     type Error = Error;
     fn try_from(req: &pb::ListReq) -> Result<Self, Self::Error> {
+
+        // include_naming is true if any of the naming fields are true
+        // If it's false, then it means the types list, which they are indexed
+        // by, is not needed.
         let include_naming = req.include_name
             || req.include_market_group
             || req.include_group
             || req.include_category;
+
         Ok(match (
             pb::Query::from_i32(req.include_configured)
                 .ok_or(ProtoFieldError::InvalidQuery {
@@ -75,7 +82,6 @@ impl TryFrom<&pb::ListReq> for Procedure {
             ( pb::Query::False, _,                _, true  ) => Self::new( true,  true,  Iterate::Types, Keep::NotConfigured ),
             ( _,                _,                _, false ) => Self::new( true,  false, Iterate::Items, Keep::InItems       ),
             ( _,                _,                _, true  ) => Self::new( true,  true,  Iterate::Types, Keep::InItems       ),
-            _ => unreachable!(),
         })
     }
 }
