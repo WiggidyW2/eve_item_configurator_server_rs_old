@@ -29,6 +29,9 @@ pub use accessors::{
     CharacterSetter,
 };
 
+// re-export for convenience to accessor implementors
+pub use tonic::async_trait;
+
 pub async fn serve(
     accessor: impl Accessor,
     client_id: String,
