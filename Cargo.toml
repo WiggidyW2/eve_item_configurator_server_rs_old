@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 character_validator = { git = "https://github.com/WiggidyW/eve_character_validator_rs.git" }
-
 hyper = { version = "0.14.26", features = ["client", "http1", "tcp"] }
 hyper-tls = { version = "0.5.0" }
 serde_json = { version = "1.0" }
