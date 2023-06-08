@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub enum Error {
     ProtoFieldError(crate::service::ProtoFieldError),
-    ValidatorError(character_validator::Error),
+    ValidatorError(eve_character_validator::Error),
     AccessorError(crate::accessors::Error),
     JsonError(crate::service::JsonError),
     ServeError(tonic::transport::Error),
@@ -13,8 +13,8 @@ impl From<crate::accessors::Error> for Error {
     }
 }
 
-impl From<character_validator::Error> for Error {
-    fn from(e: character_validator::Error) -> Self {
+impl From<eve_character_validator::Error> for Error {
+    fn from(e: eve_character_validator::Error) -> Self {
         Self::ValidatorError(e)
     }
 }

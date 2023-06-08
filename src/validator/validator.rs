@@ -2,7 +2,7 @@ use crate::{
     error::Error,
 };
 
-use character_validator::{validate, JWKS, Response};
+use eve_character_validator::{validate, JWKS, Response};
 use hyper::{
     client::connect::HttpConnector,
     body::Body,

@@ -9,7 +9,7 @@ use crate::{
     pb,
 };
 
-use character_validator::Response as ValidatorResponse;
+use eve_character_validator::Response as ValidatorResponse;
 
 pub struct Service<A> {
     pub accessor: AccessorWrapper<A>,

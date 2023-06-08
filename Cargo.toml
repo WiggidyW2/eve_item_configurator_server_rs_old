@@ -1,12 +1,12 @@
 [package]
-name = "item_configurator_server"
+name = "eve_item_configurator_server"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-character_validator = { git = "https://github.com/WiggidyW/eve_character_validator_rs.git" }
+eve_character_validator = { git = "https://github.com/WiggidyW/eve_character_validator_rs.git" }
 hyper = { version = "0.14.26", features = ["client", "http1", "tcp"] }
 hyper-tls = { version = "0.5.0" }
 serde_json = { version = "1.0" }
