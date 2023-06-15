@@ -88,7 +88,7 @@ impl<A: Accessor> Service<A> {
                 i += 1;
             }
             // Index of last element
-            json_indexes.push(i + 1);
+            json_indexes.push(i);
             // Reserialize to be consistent and possibly smaller.
             json_strings.push(serde_json::to_string(&new_json_value).unwrap());
             // Push the new JSON value onto the existing JSON values,
