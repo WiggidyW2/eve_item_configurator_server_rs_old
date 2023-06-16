@@ -130,9 +130,16 @@ impl<A: Accessor> Service<A> {
                 groups.indexes,
                 names,
                 types.into_iter().rev().map(|type_id| {
-                    let (json_idx, enabled) = match items.remove(&type_id) {
-                        Some(json_idx) => (json_idx, true),
-                        None => (HashMap::new(), false),
+                    let (json_idx, enabled) = match (
+                        items.remove(&type_id),
+                        req.include_json,
+                     ) {
+                        // There is an item and we don't need json.
+                        (Some(_), false) => (HashMap::new(), true),
+                        // There is an item and we need json.
+                        (Some(json_idx), true) => (json_idx, true),
+                        // There is no item.
+                        (None, _) => (HashMap::new(), false),
                     };
                     (type_id, enabled, json_idx)
                 }),
