@@ -72,7 +72,7 @@ impl TryFrom<&pb::ListReq> for Procedure {
             req.include_json,
             include_naming,
         ) {
-            ( pb::Query::Both,  pb::Query::Both,  x, _     ) => Self::new( x,     true,  Iterate::Types, Keep::InTypes       ),
+            ( pb::Query::Both,  pb::Query::Both,  _, _     ) => Self::new( true,  true,  Iterate::Types, Keep::InTypes       ),
             ( pb::Query::True,  pb::Query::False, _, _     ) => Self::new( false, false, Iterate::None,  Keep::None          ),
             ( _,                pb::Query::False, _, _     ) => Self::new( true,  true,  Iterate::Types, Keep::NotInItems    ),
             ( pb::Query::True,  _,                _, false ) => Self::new( true,  false, Iterate::Items, Keep::Configured    ),
