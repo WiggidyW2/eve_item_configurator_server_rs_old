@@ -1,33 +1,20 @@
-use super::{
-    service::Service,
-    error::JsonError,
-};
+use super::{error::JsonError, service::Service};
 
-use crate::{
-    accessors::Accessor,
-    error::Error,
-    pb,
-};
+use crate::{accessors::Accessor, error::Error, pb};
 
 use std::collections::{HashMap, HashSet};
 
 use serde_json::Value as JsonValue;
 
 impl<A: Accessor> Service<A> {
-    fn update_items_authorized_abort(
-        &self,
-        new_token: String,
-    ) -> pb::UpdateRep {
+    fn update_items_authorized_abort(&self, new_token: String) -> pb::UpdateRep {
         pb::UpdateRep {
             refresh_token: new_token,
             authorized: true,
         }
     }
-    
-    pub fn update_items_unauthorized(
-        &self,
-        new_token: String,
-    ) -> pb::UpdateRep {
+
+    pub fn update_items_unauthorized(&self, new_token: String) -> pb::UpdateRep {
         pb::UpdateRep {
             refresh_token: new_token,
             authorized: false,
@@ -66,10 +53,10 @@ impl<A: Accessor> Service<A> {
         let mut removed_indexes = HashSet::with_capacity(json_strings.len());
 
         // Convert the JSON strings to JSON values
-        let mut json_values = json_strings_to_values(&json_strings)
-            .map_err(|e| JsonError::Old(e))?; // Storage JSON
-        let new_json_values = json_strings_to_values(&new_json_strings)
-            .map_err(|e| JsonError::New(e))?; // New JSON from request
+        let mut json_values =
+            json_strings_to_values(&json_strings).map_err(|e| JsonError::Old(e))?; // Storage JSON
+        let new_json_values =
+            json_strings_to_values(&new_json_strings).map_err(|e| JsonError::New(e))?; // New JSON from request
 
         // We will be mapping the new Item JSON indexes to different indexes
         // for the purposes of deduplication.
@@ -99,13 +86,12 @@ impl<A: Accessor> Service<A> {
         // Update the existing items with the new JSON keys / indexes, adding
         // new items as necessary, and removing items that are disabled.
         for new_item in new_items {
-
             // If enabled, update the existing item.
             if new_item.enabled {
                 // Get the existing item or create a new one.
-                let item = items.entry(new_item.type_id).or_insert_with(|| {
-                    HashMap::with_capacity(new_item.json_idx.len())
-                });
+                let item = items
+                    .entry(new_item.type_id)
+                    .or_insert_with(|| HashMap::with_capacity(new_item.json_idx.len()));
                 for (key, json_index) in new_item.json_idx {
                     let new_index = json_indexes[json_index as usize];
                     let removed_index = match &json_values[new_index] {
@@ -146,7 +132,7 @@ impl<A: Accessor> Service<A> {
         if let Some(fut) = insert_json_fut {
             fut.await?;
         }
-        
+
         // Return the response
         Ok(pb::UpdateRep {
             refresh_token: new_token,
@@ -155,9 +141,7 @@ impl<A: Accessor> Service<A> {
     }
 }
 
-fn json_strings_to_values(
-    json_strings: &[String],
-) -> Result<Vec<JsonValue>, serde_json::Error> {
+fn json_strings_to_values(json_strings: &[String]) -> Result<Vec<JsonValue>, serde_json::Error> {
     let mut json_values = Vec::with_capacity(json_strings.len());
     for json_string in json_strings {
         let json_value = serde_json::from_str(json_string)?;
@@ -171,7 +155,10 @@ fn remove_dangling_json(
     items: &mut HashMap<u32, HashMap<String, u32>>,
     json_strings: &mut Vec<String>,
 ) {
-    if removed_indexes.len() == 0 { return; }
+    println!("{:?}, {:?}, {:?}", removed_indexes, items, json_strings);
+    if removed_indexes.len() == 0 {
+        return;
+    }
 
     // Remove the indexes from removed_indexes that are still being used
     for indexes in items.values() {
@@ -180,7 +167,9 @@ fn remove_dangling_json(
         }
     }
 
-    if removed_indexes.len() == 0 { return; }
+    if removed_indexes.len() == 0 {
+        return;
+    }
 
     // Remove the unused JSON strings
     let mut i = 0;
@@ -192,11 +181,15 @@ fn remove_dangling_json(
 
     // Convert the removed_indexes to a sorted vector
     let removed_indexes = to_sorted_vec(removed_indexes);
-    
+
     // Update the Items' JSON indexes to account for the shifts
     let max_shift = removed_indexes.len() as u32;
     let first_index = removed_indexes[0];
     let last_index = removed_indexes[removed_indexes.len() - 1];
+    // let mid_slice = match removed_indexes.len() {
+    //     1 => &[],
+    //     _ => &removed_indexes[1..&removed_indexes.len() - 1],
+    // };
     let mid_slice = &removed_indexes[1..&removed_indexes.len() - 1];
     for indexes in items.values_mut() {
         for index in indexes.values_mut() {
@@ -208,9 +201,7 @@ fn remove_dangling_json(
                 *index -= max_shift;
             // Binary search for the partition point
             } else {
-                let shift = 1 + mid_slice
-                    .partition_point(|i| *index > *i)
-                    as u32;
+                let shift = 1 + mid_slice.partition_point(|i| *index > *i) as u32;
                 *index -= shift;
             }
         }
@@ -228,9 +219,7 @@ fn to_sorted_vec(set: HashSet<u32>) -> Vec<u32> {
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        remove_dangling_json,
-    };
+    use super::remove_dangling_json;
 
     use std::collections::{HashMap, HashSet};
 
@@ -266,7 +255,7 @@ mod tests {
             item.insert("6".to_string(), 6);
             item
         });
-        
+
         let mut json_strings = vec![
             "0".to_string(),
             "1".to_string(),
@@ -280,13 +269,16 @@ mod tests {
 
         remove_dangling_json(removed_indexes, &mut items, &mut json_strings);
 
-        assert_eq!(json_strings, vec![
-            "0".to_string(),
-            "2".to_string(),
-            "4".to_string(),
-            "5".to_string(),
-            "6".to_string(),
-        ]);
+        assert_eq!(
+            json_strings,
+            vec![
+                "0".to_string(),
+                "2".to_string(),
+                "4".to_string(),
+                "5".to_string(),
+                "6".to_string(),
+            ]
+        );
 
         assert_eq!(items[&0], {
             let mut item = HashMap::with_capacity(3);
@@ -306,7 +298,7 @@ mod tests {
             item.insert("6 again".to_string(), 4);
             item
         });
-        
+
         assert_eq!(items[&2], {
             let mut item = HashMap::with_capacity(3);
             item.insert("2".to_string(), 1);
@@ -315,4 +307,7 @@ mod tests {
             item
         });
     }
+
+    // Test with a single item
+    // fn remove_dangling_json_test2() {
 }
