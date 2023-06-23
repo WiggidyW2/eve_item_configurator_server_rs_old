@@ -155,7 +155,6 @@ fn remove_dangling_json(
     items: &mut HashMap<u32, HashMap<String, u32>>,
     json_strings: &mut Vec<String>,
 ) {
-    println!("{:?}, {:?}, {:?}", removed_indexes, items, json_strings);
     if removed_indexes.len() == 0 {
         return;
     }
