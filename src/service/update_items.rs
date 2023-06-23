@@ -186,11 +186,10 @@ fn remove_dangling_json(
     let max_shift = removed_indexes.len() as u32;
     let first_index = removed_indexes[0];
     let last_index = removed_indexes[removed_indexes.len() - 1];
-    // let mid_slice = match removed_indexes.len() {
-    //     1 => &[],
-    //     _ => &removed_indexes[1..&removed_indexes.len() - 1],
-    // };
-    let mid_slice = &removed_indexes[1..&removed_indexes.len() - 1];
+    let mid_slice = match removed_indexes.len() {
+        1 => &[],
+        _ => &removed_indexes[1..&removed_indexes.len() - 1],
+    };
     for indexes in items.values_mut() {
         for index in indexes.values_mut() {
             // No shifting required
@@ -309,5 +308,41 @@ mod tests {
     }
 
     // Test with a single item
-    // fn remove_dangling_json_test2() {
+    #[test]
+    fn remove_dangling_json_test2() {
+        let mut removed_indexes = HashSet::new();
+        removed_indexes.insert(0);
+
+        let mut items = HashMap::new();
+        items.insert(62508, {
+            let mut item = HashMap::with_capacity(1);
+            item.insert("1DQ".to_string(), 1);
+            item
+        });
+        items.insert(62490, {
+            let mut item = HashMap::with_capacity(1);
+            item.insert("1DQ".to_string(), 1);
+            item
+        });
+        items.insert(46309, HashMap::new());
+        items.insert(46283, HashMap::new());
+
+        let mut json_strings = vec!["LongOne".to_string(), "Short".to_string()];
+
+        remove_dangling_json(removed_indexes, &mut items, &mut json_strings);
+
+        assert_eq!(json_strings, vec!["Short".to_string()]);
+        assert_eq!(items[&62508], {
+            let mut item = HashMap::with_capacity(1);
+            item.insert("1DQ".to_string(), 0);
+            item
+        });
+        assert_eq!(items[&62490], {
+            let mut item = HashMap::with_capacity(1);
+            item.insert("1DQ".to_string(), 0);
+            item
+        });
+        assert_eq!(items[&46309], HashMap::new());
+        assert_eq!(items[&46283], HashMap::new());
+    }
 }
